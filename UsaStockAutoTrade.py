@@ -5,7 +5,7 @@ from pytz import timezone
 import time
 import yaml
 
-with open('config.yaml', encoding='UTF-8') as f:
+with open('config_my.yaml', encoding='UTF-8') as f:
     _cfg = yaml.load(f, Loader=yaml.FullLoader)
 APP_KEY = _cfg['APP_KEY']
 APP_SECRET = _cfg['APP_SECRET']
@@ -110,12 +110,6 @@ def get_stock_balance():
     res = requests.get(URL, headers=headers, params=params)
     stock_list = res.json()['output1']
     evaluation = res.json()['output2']
-    params['OVRS_EXCG_CD'] = "NYSE"
-    res = requests.get(URL, headers=headers, params=params)
-    stock_list = stock_list + res.json()['output1']
-    params['OVRS_EXCG_CD'] = "AMEX"
-    res = requests.get(URL, headers=headers, params=params)
-    stock_list = stock_list + res.json()['output1']
     stock_dict = {}
     send_message(f"====주식 보유잔고====")
     for stock in stock_list:
