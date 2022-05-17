@@ -117,9 +117,9 @@ def get_stock_balance():
             stock_dict[stock['ovrs_pdno']] = stock['ovrs_cblc_qty']
             send_message(f"{stock['ovrs_item_name']}({stock['ovrs_pdno']}): {stock['ovrs_cblc_qty']}주")
             time.sleep(0.1)
-    send_message(f"주식 평가 금액: {evaluation['tot_evlu_pfls_amt']}원")
+    send_message(f"주식 평가 금액: ${evaluation['tot_evlu_pfls_amt']}")
     time.sleep(0.1)
-    send_message(f"평가 손익 합계: {evaluation['ovrs_tot_pfls']}원")
+    send_message(f"평가 손익 합계: ${evaluation['ovrs_tot_pfls']}")
     time.sleep(0.1)
     send_message(f"=================")
     return stock_dict
