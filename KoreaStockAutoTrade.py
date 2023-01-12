@@ -32,7 +32,7 @@ def get_access_token():
     res = requests.post(URL, headers=headers, data=json.dumps(body))
     ACCESS_TOKEN = res.json()["access_token"]
     return ACCESS_TOKEN
-    
+    주식 보유잔고
 def hashkey(datas):
     """암호화"""
     PATH = "uapi/hashkey"
@@ -47,7 +47,7 @@ def hashkey(datas):
     return hashkey
 
 def get_current_price(code="005930"):
-    """현재가 조회"""
+    """current price check"""
     PATH = "uapi/domestic-stock/v1/quotations/inquire-price"
     URL = f"{URL_BASE}/{PATH}"
     headers = {"Content-Type":"application/json", 
@@ -63,7 +63,7 @@ def get_current_price(code="005930"):
     return int(res.json()['output']['stck_prpr'])
 
 def get_target_price(code="005930"):
-    """변동성 돌파 전략으로 매수 목표가 조회"""
+    """Investigate acquisition target price with volatility breakthrough strategy"""
     PATH = "uapi/domestic-stock/v1/quotations/inquire-daily-price"
     URL = f"{URL_BASE}/{PATH}"
     headers = {"Content-Type":"application/json", 
@@ -78,14 +78,14 @@ def get_target_price(code="005930"):
     "fid_period_div_code":"D"
     }
     res = requests.get(URL, headers=headers, params=params)
-    stck_oprc = int(res.json()['output'][0]['stck_oprc']) #오늘 시가
-    stck_hgpr = int(res.json()['output'][1]['stck_hgpr']) #전일 고가
-    stck_lwpr = int(res.json()['output'][1]['stck_lwpr']) #전일 저가
+    stck_oprc = int(res.json()['output'][0]['stck_oprc']) # today start
+    stck_hgpr = int(res.json()['output'][1]['stck_hgpr']) # yesterday high
+    stck_lwpr = int(res.json()['output'][1]['stck_lwpr']) # yesterdat low
     target_price = stck_oprc + (stck_hgpr - stck_lwpr) * 0.5
     return target_price
 
 def get_stock_balance():
-    """주식 잔고조회"""
+    """Check balance"""
     PATH = "uapi/domestic-stock/v1/trading/inquire-balance"
     URL = f"{URL_BASE}/{PATH}"
     headers = {"Content-Type":"application/json", 
@@ -112,7 +112,7 @@ def get_stock_balance():
     stock_list = res.json()['output1']
     evaluation = res.json()['output2']
     stock_dict = {}
-    send_message(f"====주식 보유잔고====")
+    send_message(f"==== Balance ====")
     for stock in stock_list:
         if int(stock['hldg_qty']) > 0:
             stock_dict[stock['pdno']] = stock['hldg_qty']
@@ -149,11 +149,11 @@ def get_balance():
     }
     res = requests.get(URL, headers=headers, params=params)
     cash = res.json()['output']['ord_psbl_cash']
-    send_message(f"주문 가능 현금 잔고: {cash}원")
+    send_message(f"possible current balance: {cash}won")
     return int(cash)
 
 def buy(code="005930", qty="1"):
-    """주식 시장가 매수"""  
+    """buying at current market price"""  
     PATH = "uapi/domestic-stock/v1/trading/order-cash"
     URL = f"{URL_BASE}/{PATH}"
     data = {
@@ -174,14 +174,14 @@ def buy(code="005930", qty="1"):
     }
     res = requests.post(URL, headers=headers, data=json.dumps(data))
     if res.json()['rt_cd'] == '0':
-        send_message(f"[매수 성공]{str(res.json())}")
+        send_message(f"[Buying success!]{str(res.json())}")
         return True
     else:
-        send_message(f"[매수 실패]{str(res.json())}")
+        send_message(f"[Buying failed!]{str(res.json())}")
         return False
 
 def sell(code="005930", qty="1"):
-    """주식 시장가 매도"""
+    """Selling at a market price"""
     PATH = "uapi/domestic-stock/v1/trading/order-cash"
     URL = f"{URL_BASE}/{PATH}"
     data = {
@@ -202,77 +202,78 @@ def sell(code="005930", qty="1"):
     }
     res = requests.post(URL, headers=headers, data=json.dumps(data))
     if res.json()['rt_cd'] == '0':
-        send_message(f"[매도 성공]{str(res.json())}")
+        send_message(f"[Sale succese!!]{str(res.json())}")
         return True
     else:
-        send_message(f"[매도 실패]{str(res.json())}")
+        send_message(f"[Sale failed!!]{str(res.json())}")
         return False
 
-# 자동매매 시작
+# Begin!
 try:
+    print('Begin')
     ACCESS_TOKEN = get_access_token()
 
-    symbol_list = ["005930","035720","000660","069500"] # 매수 희망 종목 리스트
-    bought_list = [] # 매수 완료된 종목 리스트
-    total_cash = get_balance() # 보유 현금 조회
-    stock_dict = get_stock_balance() # 보유 주식 조회
+    symbol_list = ["005930","035720","000660","069500"] # buying wishlist.
+    bought_list = [] # bought list
+    total_cash = get_balance() # $ had.
+    stock_dict = get_stock_balance() # check stock balance
     for sym in stock_dict.keys():
         bought_list.append(sym)
-    target_buy_count = 3 # 매수할 종목 수
-    buy_percent = 0.33 # 종목당 매수 금액 비율
-    buy_amount = total_cash * buy_percent  # 종목별 주문 금액 계산
+    target_buy_count = 3 # how many company I wanna buy.
+    buy_percent = 0.33 # percentage per company.
+    buy_amount = total_cash * buy_percent  # amount of money computation as percentages.
     soldout = False
 
-    send_message("===국내 주식 자동매매 프로그램을 시작합니다===")
-    while True:
-        t_now = datetime.datetime.now()
-        t_9 = t_now.replace(hour=9, minute=0, second=0, microsecond=0)
-        t_start = t_now.replace(hour=9, minute=5, second=0, microsecond=0)
-        t_sell = t_now.replace(hour=15, minute=15, second=0, microsecond=0)
-        t_exit = t_now.replace(hour=15, minute=20, second=0,microsecond=0)
-        today = datetime.datetime.today().weekday()
-        if today == 5 or today == 6:  # 토요일이나 일요일이면 자동 종료
-            send_message("주말이므로 프로그램을 종료합니다.")
-            break
-        if t_9 < t_now < t_start and soldout == False: # 잔여 수량 매도
-            for sym, qty in stock_dict.items():
-                sell(sym, qty)
-            soldout == True
-            bought_list = []
-            stock_dict = get_stock_balance()
-        if t_start < t_now < t_sell :  # AM 09:05 ~ PM 03:15 : 매수
-            for sym in symbol_list:
-                if len(bought_list) < target_buy_count:
-                    if sym in bought_list:
-                        continue
-                    target_price = get_target_price(sym)
-                    current_price = get_current_price(sym)
-                    if target_price < current_price:
-                        buy_qty = 0  # 매수할 수량 초기화
-                        buy_qty = int(buy_amount // current_price)
-                        if buy_qty > 0:
-                            send_message(f"{sym} 목표가 달성({target_price} < {current_price}) 매수를 시도합니다.")
-                            result = buy(sym, buy_qty)
-                            if result:
-                                soldout = False
-                                bought_list.append(sym)
-                                get_stock_balance()
-                    time.sleep(1)
-            time.sleep(1)
-            if t_now.minute == 30 and t_now.second <= 5: 
-                get_stock_balance()
-                time.sleep(5)
-        if t_sell < t_now < t_exit:  # PM 03:15 ~ PM 03:20 : 일괄 매도
-            if soldout == False:
-                stock_dict = get_stock_balance()
-                for sym, qty in stock_dict.items():
-                    sell(sym, qty)
-                soldout = True
-                bought_list = []
-                time.sleep(1)
-        if t_exit < t_now:  # PM 03:20 ~ :프로그램 종료
-            send_message("프로그램을 종료합니다.")
-            break
+    # send_message("=== Programme Begin!! ===")
+    # while True:
+    #     t_now = datetime.datetime.now()
+    #     t_9 = t_now.replace(hour=9, minute=0, second=0, microsecond=0)
+    #     t_start = t_now.replace(hour=9, minute=5, second=0, microsecond=0)
+    #     t_sell = t_now.replace(hour=15, minute=15, second=0, microsecond=0)
+    #     t_exit = t_now.replace(hour=15, minute=20, second=0,microsecond=0)
+    #     today = datetime.datetime.today().weekday()
+    #     if today == 5 or today == 6:  # sat or sun.
+    #         send_message("Terminating on Sat or Sun.")
+    #         break
+    #     if t_9 < t_now < t_start and soldout == False: # Selling the remained.
+    #         for sym, qty in stock_dict.items():
+    #             sell(sym, qty)
+    #         soldout == True
+    #         bought_list = []
+    #         stock_dict = get_stock_balance()
+    #     if t_start < t_now < t_sell :  # AM 09:05 ~ PM 03:15 : Buying
+    #         for sym in symbol_list:
+    #             if len(bought_list) < target_buy_count:
+    #                 if sym in bought_list:
+    #                     continue
+    #                 target_price = get_target_price(sym)
+    #                 current_price = get_current_price(sym)
+    #                 if target_price < current_price:
+    #                     buy_qty = 0  # Initilization quantity.
+    #                     buy_qty = int(buy_amount // current_price)
+    #                     if buy_qty > 0:
+    #                         send_message(f"{sym} 목표가 달성({target_price} < {current_price}) 매수를 시도합니다.")
+    #                         result = buy(sym, buy_qty)
+    #                         if result:
+    #                             soldout = False
+    #                             bought_list.append(sym)
+    #                             get_stock_balance()
+    #                 time.sleep(1)
+    #         time.sleep(1)
+    #         if t_now.minute == 30 and t_now.second <= 5: 
+    #             get_stock_balance()
+    #             time.sleep(5)
+    #     if t_sell < t_now < t_exit:  # 15:15 ~ 15:20 : selling all the remains
+    #         if soldout == False:
+    #             stock_dict = get_stock_balance()
+    #             for sym, qty in stock_dict.items():
+    #                 sell(sym, qty)
+    #             soldout = True
+    #             bought_list = []
+    #             time.sleep(1)
+    #     if t_exit < t_now:  # PM 03:20 ~ :Terminating the programme
+    #         send_message("Terminating the programme.")
+    #         break
 except Exception as e:
     send_message(f"[오류 발생]{e}")
     time.sleep(1)
