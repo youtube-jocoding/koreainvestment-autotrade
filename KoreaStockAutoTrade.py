@@ -118,13 +118,13 @@ def get_stock_balance():
     for stock in stock_list:
         if int(stock['hldg_qty']) > 0:
             stock_dict[stock['pdno']] = stock['hldg_qty']
-            send_message(f"{stock['prdt_name']}({stock['pdno']}): {stock['hldg_qty']}주")
+            send_message(f"{stock['prdt_name']}({stock['pdno']}): {stock['hldg_qty']} [주]")
             time.sleep(0.1)
-    send_message(f"Evaluated price: {evaluation[0]['scts_evlu_amt']}Won")
+    send_message(f"Evaluated price: {evaluation[0]['scts_evlu_amt']} [Won]")
     time.sleep(0.1)
-    send_message(f"Evaluated profit or loss: {evaluation[0]['evlu_pfls_smtl_amt']}Won")
+    send_message(f"Evaluated profit or loss: {evaluation[0]['evlu_pfls_smtl_amt']} [Won]")
     time.sleep(0.1)
-    send_message(f"Total value: {evaluation[0]['tot_evlu_amt']}Won")
+    send_message(f"Total value: {evaluation[0]['tot_evlu_amt']} [Won]")
     time.sleep(0.1)
     send_message(f"=================")
     return stock_dict
@@ -150,7 +150,7 @@ def get_balance():
     }
     res = requests.get(URL, headers=headers, params=params)
     cash = res.json()['output']['ord_psbl_cash']
-    send_message(f"possible current balance: {cash}won")
+    send_message(f"Current balance possible: {cash} [Won]")
     return int(cash)
 
 def buy(code="005930", qty="1"):
@@ -209,16 +209,23 @@ def sell(code="005930", qty="1"):
         send_message(f"[Sale failed!!]{str(res.json())}")
         return False
 
+def printing_lists(symbol_list):
+    print('Calling the name from the whole list.')
+    pass
+
 # Begin!
 try:
-    print('Begin')
     ACCESS_TOKEN = get_access_token()
 
     symbol_list = ["005930","035720","000660","069500"] # buying wishlist.
+    
+    printing_lists(symbol_list)
+    
     bought_list = [] # bought list
     total_cash  = get_balance() # $ had.
     stock_dict  = get_stock_balance() # check stock balance
     for sym in stock_dict.keys():
+        print('sym =', sym)
         bought_list.append(sym)
         
     target_buy_count = 3 # how many company I wanna buy.
@@ -227,6 +234,7 @@ try:
     soldout     = False
 
     send_message("=== Programme Begin!! ===")
+    
     while True:
         t_now = datetime.datetime.now()
         # print(t_now)
@@ -236,11 +244,12 @@ try:
         t_exit  = t_now.replace(hour=15, minute=20, second=0, microsecond=0)
         today   = datetime.datetime.today().weekday()
         # print(t_sell)
-        
+        # print(stock_dict.items())
+        break    
         if today == 5 or today == 6:  # sat or sun.
             send_message("Terminating on Sat or Sun.")
             break
-    #     if t_9 < t_now < t_start and soldout == False: # Selling the remained.
+        # if t_9 < t_now < t_start and soldout == False: # Selling the remained.
     #         for sym, qty in stock_dict.items():
     #             sell(sym, qty)
     #         soldout == True
