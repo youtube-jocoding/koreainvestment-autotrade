@@ -4,7 +4,7 @@ import datetime
 import time
 import yaml
 
-yaml_path = r'D:\git\trading_data\congif.yaml'
+yaml_path = r'D:\git\trading_data\config.yaml'
 
 with open(yaml_path, encoding='UTF-8') as f:
     _cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -120,17 +120,16 @@ def get_stock_balance():
             stock_dict[stock['pdno']] = stock['hldg_qty']
             send_message(f"{stock['prdt_name']}({stock['pdno']}): {stock['hldg_qty']}주")
             time.sleep(0.1)
-    send_message(f"주식 평가 금액: {evaluation[0]['scts_evlu_amt']}원")
+    send_message(f"Evaluated price: {evaluation[0]['scts_evlu_amt']}Won")
     time.sleep(0.1)
-    send_message(f"평가 손익 합계: {evaluation[0]['evlu_pfls_smtl_amt']}원")
+    send_message(f"Evaluated profit or loss: {evaluation[0]['evlu_pfls_smtl_amt']}Won")
     time.sleep(0.1)
-    send_message(f"총 평가 금액: {evaluation[0]['tot_evlu_amt']}원")
+    send_message(f"Total value: {evaluation[0]['tot_evlu_amt']}Won")
     time.sleep(0.1)
     send_message(f"=================")
     return stock_dict
 
 def get_balance():
-    """현금 잔고조회"""
     PATH = "uapi/domestic-stock/v1/trading/inquire-psbl-order"
     URL = f"{URL_BASE}/{PATH}"
     headers = {"Content-Type":"application/json", 
@@ -277,5 +276,5 @@ try:
     #         send_message("Terminating the programme.")
     #         break
 except Exception as e:
-    send_message(f"[오류 발생]{e}")
+    send_message(f"[Error!]]{e}")
     time.sleep(1)
