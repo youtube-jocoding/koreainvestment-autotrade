@@ -17,14 +17,14 @@ DISCORD_WEBHOOK_URL = _cfg['DISCORD_WEBHOOK_URL']
 URL_BASE = _cfg['URL_BASE']
 
 def send_message(msg):
-    """디스코드 메세지 전송"""
+    """Sending to discord webhook"""
     now = datetime.datetime.now()
     message = {"content": f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] {str(msg)}"}
     requests.post(DISCORD_WEBHOOK_URL, data=message)
     print(message)
 
 def get_access_token():
-    """토큰 발급"""
+    """get access token"""
     headers = {"content-type":"application/json"}
     body = {"grant_type":"client_credentials",
     "appkey":APP_KEY, 
@@ -36,7 +36,7 @@ def get_access_token():
     return ACCESS_TOKEN
 
 def hashkey(datas):
-    """암호화"""
+    """hash key"""
     PATH = "uapi/hashkey"
     URL = f"{URL_BASE}/{PATH}"
     headers = {
