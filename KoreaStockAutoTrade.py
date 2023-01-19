@@ -216,26 +216,30 @@ try:
 
     symbol_list = ["005930","035720","000660","069500"] # buying wishlist.
     bought_list = [] # bought list
-    total_cash = get_balance() # $ had.
-    stock_dict = get_stock_balance() # check stock balance
+    total_cash  = get_balance() # $ had.
+    stock_dict  = get_stock_balance() # check stock balance
     for sym in stock_dict.keys():
         bought_list.append(sym)
+        
     target_buy_count = 3 # how many company I wanna buy.
     buy_percent = 0.33 # percentage per company.
-    buy_amount = total_cash * buy_percent  # amount of money computation as percentages.
-    soldout = False
+    buy_amount  = total_cash * buy_percent  # amount of money computation as percentages.
+    soldout     = False
 
-    # send_message("=== Programme Begin!! ===")
-    # while True:
-    #     t_now = datetime.datetime.now()
-    #     t_9 = t_now.replace(hour=9, minute=0, second=0, microsecond=0)
-    #     t_start = t_now.replace(hour=9, minute=5, second=0, microsecond=0)
-    #     t_sell = t_now.replace(hour=15, minute=15, second=0, microsecond=0)
-    #     t_exit = t_now.replace(hour=15, minute=20, second=0,microsecond=0)
-    #     today = datetime.datetime.today().weekday()
-    #     if today == 5 or today == 6:  # sat or sun.
-    #         send_message("Terminating on Sat or Sun.")
-    #         break
+    send_message("=== Programme Begin!! ===")
+    while True:
+        t_now = datetime.datetime.now()
+        # print(t_now)
+        t_9     = t_now.replace(hour=9,  minute=0,  second=0, microsecond=0)
+        t_start = t_now.replace(hour=9,  minute=5,  second=0, microsecond=0)
+        t_sell  = t_now.replace(hour=15, minute=15, second=0, microsecond=0)
+        t_exit  = t_now.replace(hour=15, minute=20, second=0, microsecond=0)
+        today   = datetime.datetime.today().weekday()
+        # print(t_sell)
+        
+        if today == 5 or today == 6:  # sat or sun.
+            send_message("Terminating on Sat or Sun.")
+            break
     #     if t_9 < t_now < t_start and soldout == False: # Selling the remained.
     #         for sym, qty in stock_dict.items():
     #             sell(sym, qty)
