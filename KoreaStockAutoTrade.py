@@ -4,7 +4,9 @@ import datetime
 import time
 import yaml
 
-with open('config.yaml', encoding='UTF-8') as f:
+yaml_path = r'D:\git\trading_data\congif.yaml'
+
+with open(yaml_path, encoding='UTF-8') as f:
     _cfg = yaml.load(f, Loader=yaml.FullLoader)
 APP_KEY = _cfg['APP_KEY']
 APP_SECRET = _cfg['APP_SECRET']
@@ -32,7 +34,7 @@ def get_access_token():
     res = requests.post(URL, headers=headers, data=json.dumps(body))
     ACCESS_TOKEN = res.json()["access_token"]
     return ACCESS_TOKEN
-    주식 보유잔고
+
 def hashkey(datas):
     """암호화"""
     PATH = "uapi/hashkey"
