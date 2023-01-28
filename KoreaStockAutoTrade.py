@@ -4,7 +4,7 @@ import datetime
 import time
 import yaml
 
-yaml_path = r'D:\git\trading_data\config.yaml'
+yaml_path = r'./trading_data/config.yaml'
 
 with open(yaml_path, encoding='UTF-8') as f:
     _cfg = yaml.load(f, Loader=yaml.FullLoader)
